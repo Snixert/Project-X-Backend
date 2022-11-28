@@ -27,10 +27,6 @@ public partial class ApiDbContext : DbContext
 
     public virtual DbSet<Stat> Stats { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-KVQIH9S;DATABASE=SpilDB;User Id=sad;password=1234;Trusted_Connection=true;trustServerCertificate=true;Integrated Security=false");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Account>(entity =>
