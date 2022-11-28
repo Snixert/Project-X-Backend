@@ -55,7 +55,6 @@ namespace ProjectXBackend.Controllers
                         })
                     })
                 }).ToListAsync();
-
             return Ok(players);
         }
     }
