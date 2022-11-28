@@ -125,7 +125,7 @@ public partial class ApiDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__Stats__3214EC27090BC7DF");
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.Stat1)
+            entity.Property(e => e.StatName)
                 .HasMaxLength(50)
                 .HasColumnName("Stat");
         });
