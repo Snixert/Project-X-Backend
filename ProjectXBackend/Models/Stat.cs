@@ -7,7 +7,7 @@ public partial class Stat
 {
     public int Id { get; set; }
 
-    public string Stat1 { get; set; } = null!;
+    public string StatName { get; set; } = null!;
 
     public virtual ICollection<ItemStat> ItemStats { get; } = new List<ItemStat>();
 
