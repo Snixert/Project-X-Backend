@@ -130,5 +130,25 @@ namespace ProjectXBackend.Controllers
                 }).FirstOrDefaultAsync();
             return Ok(playerInventory);
         }
+
+        [HttpGet]
+        [Route("{id:int}/stats")]
+        public async Task<IActionResult> GetPlayerStats(int id)
+        {
+            var playerStats = await dbContext.Players
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    PlayerStats = p.PlayerStats.Select(stats => new
+                    {
+                        StatsId = stats.StatsId,
+                        StatName = stats.Stats.StatName,
+                        StatValue = stats.StatsValue
+                    })
+                }).FirstOrDefaultAsync();
+            return Ok(playerStats);
+        }
     }
 }
