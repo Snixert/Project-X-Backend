@@ -132,6 +132,36 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpGet]
+        [Route("{id:int}/weapon")]
+        public async Task<IActionResult> GetPlayerWeapon(int id)
+        {
+            var player = await dbContext.Players
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    Weapon = new
+                    {
+                        Id = p.Weapon.Id,
+                        Name = p.Weapon.Name,
+                        Type = p.Weapon.Type,
+                        ItemStats = p.Weapon.ItemStats.Select(stats => new
+                        {
+                            StatsId = stats.StatsId,
+                            StatName = stats.Stats.StatName,
+                            StatsValue = stats.StatsValue
+                        })
+                    }
+                }).FirstOrDefaultAsync();
+
+            if (player is null)
+            {
+                return NotFound($"Player with Id = {id} not found");
+            }
+
+            return Ok(player.Weapon);
+        }
+
+        [HttpGet]
         [Route("{id:int}/stats")]
         public async Task<IActionResult> GetPlayerStats(int id)
         {

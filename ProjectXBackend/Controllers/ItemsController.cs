@@ -22,7 +22,7 @@ namespace ProjectXBackend.Controllers
                 {
                     Id = i.Id,
                     Name = i.Name,
-                    Type = i.Type,                    
+                    Type = i.Type,
                     ItemStats = i.ItemStats.Select(x => new
                     {
                         StatsId = x.StatsId,
