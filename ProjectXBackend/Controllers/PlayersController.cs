@@ -100,7 +100,7 @@ namespace ProjectXBackend.Controllers
                             StatValue = f.StatsValue
                         })
                     })
-                }).ToListAsync();
+                }).FirstOrDefaultAsync();
             return Ok(players);
         }
     }
