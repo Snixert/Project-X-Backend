@@ -25,6 +25,7 @@ namespace ProjectXBackend.Controllers
                     Type = i.Type,                    
                     ItemStats = i.ItemStats.Select(x => new
                     {
+                        StatsId = x.StatsId,
                         StatName = x.Stats.StatName,
                         StatsValue = x.StatsValue
                     })
