@@ -112,8 +112,6 @@ namespace ProjectXBackend.Controllers
                 .Where(p => p.Id == id)
                 .Select(p => new
                 {
-                    Id = p.Id,
-                    Name = p.Name,
                     Inventory = p.Items.Select(i => new
                     {
                         Id = i.Id,
@@ -128,6 +126,12 @@ namespace ProjectXBackend.Controllers
 
                     })
                 }).FirstOrDefaultAsync();
+
+            if (playerInventory is null)
+            {
+                return NotFound($"Player with Id = {id} could not be found");
+            }
+
             return Ok(playerInventory);
         }
 
@@ -155,7 +159,7 @@ namespace ProjectXBackend.Controllers
 
             if (player is null)
             {
-                return NotFound($"Player with Id = {id} not found");
+                return NotFound($"Player with Id = {id} could not be found");
             }
 
             return Ok(player.Weapon);
@@ -169,8 +173,6 @@ namespace ProjectXBackend.Controllers
                 .Where(p => p.Id == id)
                 .Select(p => new
                 {
-                    Id = p.Id,
-                    Name = p.Name,
                     PlayerStats = p.PlayerStats.Select(stats => new
                     {
                         StatsId = stats.StatsId,
@@ -178,6 +180,12 @@ namespace ProjectXBackend.Controllers
                         StatValue = stats.StatsValue
                     })
                 }).FirstOrDefaultAsync();
+
+            if (playerStats is null)
+            {
+                return NotFound($"Player with Id = {id} could not be found");
+            }
+
             return Ok(playerStats);
         }
     }
