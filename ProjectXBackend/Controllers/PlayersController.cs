@@ -103,5 +103,32 @@ namespace ProjectXBackend.Controllers
                 }).FirstOrDefaultAsync();
             return Ok(players);
         }
+
+        [HttpGet]
+        [Route("{id:int}/inventory")]
+        public async Task<IActionResult> GetPlayerInventory(int id)
+        {
+            var playerInventory = await dbContext.Players
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Inventory = p.Items.Select(i => new
+                    {
+                        Id = i.Id,
+                        Name = i.Name,
+                        Type = i.Type,
+                        ItemStats = i.ItemStats.Select(stats => new
+                        {
+                            StatsId = stats.StatsId,
+                            StatName = stats.Stats.StatName,
+                            StatsValue = stats.StatsValue
+                        })
+
+                    })
+                }).FirstOrDefaultAsync();
+            return Ok(playerInventory);
+        }
     }
 }
