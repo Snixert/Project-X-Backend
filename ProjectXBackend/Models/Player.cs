@@ -17,7 +17,7 @@ public partial class Player
 
     public virtual ICollection<Account> Accounts { get; } = new List<Account>();
 
-    public virtual ICollection<PlayerStat> PlayerStats { get; } = new List<PlayerStat>();
+    public virtual ICollection<PlayerStat> PlayerStats { get; set; } = new List<PlayerStat>();
 
     public virtual Item? Weapon { get; set; }
 

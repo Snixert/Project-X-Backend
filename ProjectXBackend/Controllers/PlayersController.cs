@@ -1,6 +1,7 @@
 ﻿using ProjectXBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProjectXBackend.DTOs;
 
 namespace ProjectXBackend.Controllers
 {
@@ -187,6 +188,58 @@ namespace ProjectXBackend.Controllers
             }
 
             return Ok(playerStats);
+        }
+
+        [HttpPut]
+        [Route("{id:int}/stats")]
+        public async Task<IActionResult> UpdatePlayerStats([FromBody] List<PlayerStatDTO> updatePlayerStatRequest, int id)
+        {
+            // Load the Player and its PlayerStats
+            var player = dbContext.Players.Include(p => p.PlayerStats).FirstOrDefault(p => p.Id == id);
+
+            if (player is null)
+            {
+                return NotFound($"Player with the Id = {id} could not be found.");
+            }
+
+            // Delete PlayerStats
+            foreach (var playerStat in player.PlayerStats)
+            {
+                if (!updatePlayerStatRequest.Any(ps => ps.StatsId == playerStat.StatsId))
+                {
+                    dbContext.PlayerStats.Remove(playerStat);
+                }
+            }
+
+            foreach (var newPlayerStat in updatePlayerStatRequest)
+            {
+                var existingStats = player.PlayerStats
+                    .Where(ps => ps.StatsId == newPlayerStat.StatsId && ps.StatsId != default(int))
+                    .SingleOrDefault();
+
+                // Update existing PlayerStats with request values
+                if (existingStats != null)
+                {
+                    existingStats.StatsId = newPlayerStat.StatsId;
+                    existingStats.StatsValue = newPlayerStat.StatsValue;
+
+                    // Set PlayerStat state to modified so it gets saved to the Database
+                    dbContext.Entry(existingStats).State = EntityState.Modified;
+                }
+                else
+                {
+                    // Insert a new PlayerStat
+                    var newStat = new PlayerStat
+                    {
+                        StatsId = newPlayerStat.StatsId,
+                        StatsValue = newPlayerStat.StatsValue,
+                        PlayerId = player.Id,
+                    };
+                    player.PlayerStats.Add(newStat);
+                }
+            }
+            await dbContext.SaveChangesAsync();
+            return Ok(player);
         }
     }
 }
