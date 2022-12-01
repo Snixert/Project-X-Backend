@@ -22,4 +22,5 @@ public partial class Player
     public virtual Item? Weapon { get; set; }
 
     public virtual ICollection<Item> Items { get; } = new List<Item>();
+    public virtual ICollection<InventorySlot> InventorySlots { get; set; } = new List<InventorySlot>();
 }
