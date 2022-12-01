@@ -1,6 +1,7 @@
 ﻿using ProjectXBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProjectXBackend.DTOs;
 
 namespace ProjectXBackend.Controllers
 {
@@ -17,19 +18,26 @@ namespace ProjectXBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetItems()
         {
-            var items = await dbContext.Items
-                .Select(i => new
+            List<ItemDTO> items = new List<ItemDTO>();
+            var data = await dbContext.Items.Include(i => i.ItemStats).ThenInclude(stat => stat.Stats).ToListAsync();
+
+            foreach (var item in data)
+            {
+                ItemDTO dto = new ItemDTO();
+                dto.ItemId = item.Id;
+                dto.Name = item.Name;
+                dto.Type = item.Type;
+                foreach (var itemStat in item.ItemStats)
                 {
-                    Id = i.Id,
-                    Name = i.Name,
-                    Type = i.Type,
-                    ItemStats = i.ItemStats.Select(x => new
-                    {
-                        StatsId = x.StatsId,
-                        StatName = x.Stats.StatName,
-                        StatsValue = x.StatsValue
-                    })
-                }).ToListAsync();
+                    ItemStatDTO isd = new ItemStatDTO();
+                    isd.StatsId = itemStat.StatsId;
+                    isd.StatName = itemStat.Stats.StatName;
+                    isd.StatsValue = itemStat.StatsValue;
+
+                    dto.ItemStats.Add(isd);
+                }
+                items.Add(dto);
+            }
 
             return Ok(items);
         }
@@ -38,25 +46,27 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> GetItem(int id)
         {
-            var item = await dbContext.Items
-                .Where(i => i.Id == id)
-                .Select(i => new
-                {
-                    Id = i.Id,
-                    Name = i.Name,
-                    Type = i.Type,
-                    ItemStats = i.ItemStats.Select(x => new
-                    {
-                        StatName = x.Stats.StatName,
-                        StatsValue = x.StatsValue,
-                    })
-                }).FirstOrDefaultAsync();
+            var item = await dbContext.Items.Where(x => x.Id == id).Include(i => i.ItemStats).ThenInclude(stat => stat.Stats).FirstOrDefaultAsync();
 
             if (item is null)
             {
-                return NotFound();
+                return NotFound($"Item with the ID = {id} could not be found.");
             }
-            return Ok(item);
+
+            ItemDTO dto = new ItemDTO();
+            dto.ItemId = item.Id;
+            dto.Name = item.Name;
+            dto.Type = item.Type;
+            foreach (var itemStat in item.ItemStats)
+            {
+                ItemStatDTO isd = new ItemStatDTO();
+                isd.StatsId = itemStat.StatsId;
+                isd.StatName = itemStat.Stats.StatName;
+                isd.StatsValue = itemStat.StatsValue;
+
+                dto.ItemStats.Add(isd);
+            }
+            return Ok(dto);
         }
     }
 }
