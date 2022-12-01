@@ -68,5 +68,56 @@ namespace ProjectXBackend.Controllers
             }
             return Ok(dto);
         }
+
+        [HttpGet]
+        [Route("{id:int}/inventory")]
+        public async Task<IActionResult> GetPlayerInventory(int id)
+        {
+            var player = await dbContext.Players
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    Inventory = p.InventorySlots.Select(items => new
+                    {
+                        ItemId = items.ItemId,
+                        ItemName = items.Item.Name,
+                        ItemType = items.Item.Type,
+                        ItemStats = items.Item.ItemStats.Select(s => new
+                        {
+                            StatsId = s.StatsId,
+                            StatName = s.Stats.StatName,
+                            StatValue = s.StatsValue
+                        }),
+                    }),
+                }).FirstOrDefaultAsync();
+
+            if (player is null)
+            {
+                return NotFound($"Player with Id = {id} could not be found");
+            }
+            return Ok(player);
+        }
+
+        [HttpPost]
+        [Route("{playerId:int}/additem")]
+        public async Task<IActionResult> AddPlayerInventoryItem(int itemId, int playerId)
+        {
+            var player = await dbContext.Players.Include(p => p.InventorySlots).FirstOrDefaultAsync(x => x.Id == playerId);
+
+            if (player is null)
+            {
+                return NotFound($"Player with Id = {playerId} could not be found.");
+            }
+
+            InventorySlot item = new InventorySlot()
+            {
+                PlayerId = playerId,
+                ItemId = itemId
+            };
+
+            player.InventorySlots.Add(item);
+            await dbContext.SaveChangesAsync();
+            return Ok(player.InventorySlots);
+        }
     }
 }

@@ -16,4 +16,5 @@ public partial class Item
     public virtual ICollection<Player> PlayersNavigation { get; } = new List<Player>();
 
     public virtual ICollection<Player> Players { get; } = new List<Player>();
+    public virtual ICollection<InventorySlot> InventorySlots { get; } = new List<InventorySlot>();
 }

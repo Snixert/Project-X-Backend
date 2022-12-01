@@ -26,6 +26,7 @@ public partial class ApiDbContext : DbContext
     public virtual DbSet<PlayerStat> PlayerStats { get; set; }
 
     public virtual DbSet<Stat> Stats { get; set; }
+    public virtual DbSet<InventorySlot> Inventory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -83,23 +84,6 @@ public partial class ApiDbContext : DbContext
             entity.HasOne(d => d.Weapon).WithMany(p => p.PlayersNavigation)
                 .HasForeignKey(d => d.WeaponId)
                 .HasConstraintName("FK_Player_WeaponID");
-
-            entity.HasMany(d => d.Items).WithMany(p => p.Players)
-                .UsingEntity<Dictionary<string, object>>(
-                    "Inventory",
-                    r => r.HasOne<Item>().WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__Inventory__ItemI__440B1D61"),
-                    l => l.HasOne<Player>().WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__Inventory__Playe__44FF419A"),
-                    j =>
-                    {
-                        j.HasKey("PlayerId", "ItemId").HasName("PK__Inventor__ED699C961A7DA9D0");
-                        j.ToTable("Inventory");
-                    });
         });
 
         modelBuilder.Entity<PlayerStat>(entity =>
@@ -118,6 +102,24 @@ public partial class ApiDbContext : DbContext
                 .HasForeignKey(d => d.StatsId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PlayerStats_StatsID");
+        });
+
+        modelBuilder.Entity<InventorySlot>(entity =>
+        {
+            entity.HasKey(e => new { e.PlayerId, e.ItemId }).HasName("PK__Inventor__ED699C961A7DA9D0");
+
+            entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
+            entity.Property(e => e.ItemId).HasColumnName("ItemID");
+
+            entity.HasOne(d => d.Player).WithMany(p => p.InventorySlots)
+                .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Inventory__Playe__44FF419A");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.InventorySlots)
+                .HasForeignKey(d => d.ItemId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Inventory__ItemI__440B1D61");
         });
 
         modelBuilder.Entity<Stat>(entity =>
