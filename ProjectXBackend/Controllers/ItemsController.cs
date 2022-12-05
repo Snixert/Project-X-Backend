@@ -102,11 +102,19 @@ namespace ProjectXBackend.Controllers
         [Route("{playerId:int}/additem")]
         public async Task<IActionResult> AddPlayerInventoryItem(int itemId, int playerId)
         {
+            // Load player and player's inventory
             var player = await dbContext.Players.Include(p => p.InventorySlots).FirstOrDefaultAsync(x => x.Id == playerId);
 
+            // Check if player exists
             if (player is null)
             {
                 return NotFound($"Player with Id = {playerId} could not be found.");
+            }
+
+            // Check if player has room in inventory
+            if (player.InventorySlots.Count >= 16)
+            {
+                return Conflict($"Inventory is full for player with Id = {playerId}");
             }
 
             InventorySlot item = new InventorySlot()
