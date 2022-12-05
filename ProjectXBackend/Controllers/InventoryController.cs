@@ -49,7 +49,7 @@ namespace ProjectXBackend.Controllers
         public async Task<IActionResult> AddPlayerInventoryItem(int itemId, int playerId)
         {
             // Load player and player's inventory
-            var player = await dbContext.Players.Include(p => p.InventorySlots).FirstOrDefaultAsync(x => x.Id == playerId);
+            var player = await dbContext.Players.Include(p => p.InventorySlots).FirstOrDefaultAsync(p => p.Id == playerId);
 
             // Check if player exists
             if (player is null)
@@ -72,6 +72,33 @@ namespace ProjectXBackend.Controllers
             player.InventorySlots.Add(item);
             await dbContext.SaveChangesAsync();
             return Ok(player.InventorySlots);
+        }
+
+        [HttpDelete]
+        [Route("{playerId:int}")]
+        public async Task<IActionResult> RemovePlayerInventoryItem(int playerId, int itemId)
+        {
+            // Load player and player's inventory
+            var inventory = await dbContext.Inventory.Where(i => i.PlayerId == playerId).ToListAsync();
+
+            // Check if inventory could be found.
+            if (inventory is null)
+            {
+                return NotFound($"Inventory for player with Id = {playerId} could not be found.");
+            }
+
+            // Remove items with the requested ItemId
+            foreach (var inventoryItem in inventory)
+            {
+                //Note; This way of removing all items needs to be changed if we define inventory SlotId.
+                if (inventoryItem.ItemId == itemId)
+                {
+                    dbContext.Inventory.Remove(inventoryItem);
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
