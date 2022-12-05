@@ -106,37 +106,6 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}/inventory")]
-        public async Task<IActionResult> GetPlayerInventory(int id)
-        {
-            var playerInventory = await dbContext.Players
-                .Where(p => p.Id == id)
-                .Select(p => new
-                {
-                    Inventory = p.InventorySlots.Select(i => new
-                    {
-                        Id = i.Item.Id,
-                        Type = i.Item.Type,
-                        Name = i.Item.Name,
-                        ItemStats = i.Item.ItemStats.Select(stats => new
-                        {
-                            StatsId = stats.StatsId,
-                            StatName = stats.Stats.StatName,
-                            StatsValue = stats.StatsValue
-                        })
-
-                    })
-                }).FirstOrDefaultAsync();
-
-            if (playerInventory is null)
-            {
-                return NotFound($"Player with Id = {id} could not be found");
-            }
-
-            return Ok(playerInventory);
-        }
-
-        [HttpGet]
         [Route("{id:int}/weapon")]
         public async Task<IActionResult> GetPlayerWeapon(int id)
         {
