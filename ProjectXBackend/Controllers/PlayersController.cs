@@ -164,7 +164,9 @@ namespace ProjectXBackend.Controllers
         public async Task<IActionResult> UpdatePlayerStats([FromBody] List<PlayerStatDTO> updatePlayerStatRequest, int id)
         {
             // Load the Player and its PlayerStats
-            var player = dbContext.Players.Include(p => p.PlayerStats).FirstOrDefault(p => p.Id == id);
+            var player = dbContext.Players
+                .Include(p => p.PlayerStats)
+                .FirstOrDefault(p => p.Id == id);
 
             if (player is null)
             {
