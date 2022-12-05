@@ -43,12 +43,12 @@ namespace ProjectXBackend.Controllers
                         StatsValue = ps.StatsValue,
                         StatName = ps.Stats.StatName
                     }),
-                    Items = p.Items.Select(i => new
+                    Inventory = p.InventorySlots.Select(i => new
                     {
-                        Id = i.Id,
-                        Type = i.Type,
-                        Name = i.Name,
-                        ItemStats = i.ItemStats.Select(f => new
+                        Id = i.Item.Id,
+                        Type = i.Item.Type,
+                        Name = i.Item.Name,
+                        ItemStats = i.Item.ItemStats.Select(f => new
                         {
                             StatsId = f.StatsId,
                             StatName = f.Stats.StatName,
@@ -89,12 +89,12 @@ namespace ProjectXBackend.Controllers
                         StatsValue = ps.StatsValue,
                         StatName = ps.Stats.StatName
                     }),
-                    Items = p.Items.Select(i => new
+                    Inventory = p.InventorySlots.Select(i => new
                     {
-                        Id = i.Id,
-                        Type = i.Type,
-                        Name = i.Name,
-                        ItemStats = i.ItemStats.Select(f => new
+                        Id = i.Item.Id,
+                        Type = i.Item.Type,
+                        Name = i.Item.Name,
+                        ItemStats = i.Item.ItemStats.Select(f => new
                         {
                             StatsId = f.StatsId,
                             StatName = f.Stats.StatName,
@@ -113,12 +113,12 @@ namespace ProjectXBackend.Controllers
                 .Where(p => p.Id == id)
                 .Select(p => new
                 {
-                    Inventory = p.Items.Select(i => new
+                    Inventory = p.InventorySlots.Select(i => new
                     {
-                        Id = i.Id,
-                        Name = i.Name,
-                        Type = i.Type,
-                        ItemStats = i.ItemStats.Select(stats => new
+                        Id = i.Item.Id,
+                        Type = i.Item.Type,
+                        Name = i.Item.Name,
+                        ItemStats = i.Item.ItemStats.Select(stats => new
                         {
                             StatsId = stats.StatsId,
                             StatName = stats.Stats.StatName,
