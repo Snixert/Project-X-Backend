@@ -176,40 +176,19 @@ namespace ProjectXBackend.Controllers
                 return NotFound($"Player with the Id = {id} could not be found.");
             }
 
-            // Delete PlayerStats
-            foreach (var playerStat in player.PlayerStats)
-            {
-                if (!updatePlayerStatRequest.Any(ps => ps.StatsId == playerStat.StatsId))
-                {
-                    dbContext.PlayerStats.Remove(playerStat);
-                }
-            }
-
-            foreach (var newPlayerStat in updatePlayerStatRequest)
+            foreach (var updatedPlayerStat in updatePlayerStatRequest)
             {
                 var existingStats = player.PlayerStats
-                    .Where(ps => ps.StatsId == newPlayerStat.StatsId && ps.StatsId != default(int))
+                    .Where(ps => ps.StatsId == updatedPlayerStat.StatsId && ps.StatsId != default(int))
                     .SingleOrDefault();
 
                 // Update existing PlayerStats with request values
                 if (existingStats != null)
                 {
-                    existingStats.StatsId = newPlayerStat.StatsId;
-                    existingStats.StatsValue = newPlayerStat.StatsValue;
+                    existingStats.StatsValue = updatedPlayerStat.StatsValue;
 
                     // Set PlayerStat state to modified so it gets saved to the Database
                     dbContext.Entry(existingStats).State = EntityState.Modified;
-                }
-                else
-                {
-                    // Insert a new PlayerStat
-                    var newStat = new PlayerStat
-                    {
-                        StatsId = newPlayerStat.StatsId,
-                        StatsValue = newPlayerStat.StatsValue,
-                        PlayerId = player.Id,
-                    };
-                    player.PlayerStats.Add(newStat);
                 }
             }
             await dbContext.SaveChangesAsync();
