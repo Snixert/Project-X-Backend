@@ -215,5 +215,21 @@ namespace ProjectXBackend.Controllers
             await dbContext.SaveChangesAsync();
             return Ok(player);
         }
+
+        [HttpPut]
+        [Route("{playerId:int}/weapon")]
+        public async Task<IActionResult> UpdatePlayerWeapon(int playerId, int weaponId)
+        {
+            var player = await dbContext.Players.Where(x => x.Id == playerId).FirstOrDefaultAsync();
+
+            if (player is null)
+            {
+                return NotFound($"Player with Id = {playerId} could not be found.");
+            }
+
+            player.WeaponId = weaponId;
+            await dbContext.SaveChangesAsync();
+            return Ok();
+        }
     }
 }
