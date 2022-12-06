@@ -110,29 +110,32 @@ namespace ProjectXBackend.Controllers
         public async Task<IActionResult> GetPlayerWeapon(int id)
         {
             var player = await dbContext.Players
-                .Where(p => p.Id == id)
-                .Select(p => new
-                {
-                    Weapon = new
-                    {
-                        Id = p.Weapon.Id,
-                        Name = p.Weapon.Name,
-                        Type = p.Weapon.Type,
-                        ItemStats = p.Weapon.ItemStats.Select(stats => new
-                        {
-                            StatsId = stats.StatsId,
-                            StatName = stats.Stats.StatName,
-                            StatsValue = stats.StatsValue
-                        })
-                    }
-                }).FirstOrDefaultAsync();
+                .Include(p => p.Weapon)
+                .ThenInclude(w => w.ItemStats)
+                .ThenInclude(stats => stats.Stats)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
 
-            if (player is null)
+            if (player is null || player.Weapon is null)
             {
-                return NotFound($"Player with Id = {id} could not be found");
+                return new EmptyResult();
             }
 
-            return Ok(player.Weapon);
+            ItemDTO dto = new ItemDTO();
+            dto.ItemId = player.Weapon.Id;
+            dto.Name = player.Weapon.Name;
+            dto.Type = player.Weapon.Type;
+            foreach (var itemStat in player.Weapon.ItemStats)
+            {
+                ItemStatDTO isd = new ItemStatDTO();
+                isd.StatsId = itemStat.StatsId;
+                isd.StatName = itemStat.Stats.StatName;
+                isd.StatsValue = itemStat.StatsValue;
+
+                dto.ItemStats.Add(isd);
+            }
+
+            return Ok(dto);
         }
 
         [HttpGet]
@@ -164,9 +167,9 @@ namespace ProjectXBackend.Controllers
         public async Task<IActionResult> UpdatePlayerStats([FromBody] List<PlayerStatDTO> updatePlayerStatRequest, int id)
         {
             // Load the Player and its PlayerStats
-            var player = dbContext.Players
+            var player = await dbContext.Players
                 .Include(p => p.PlayerStats)
-                .FirstOrDefault(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (player is null)
             {
