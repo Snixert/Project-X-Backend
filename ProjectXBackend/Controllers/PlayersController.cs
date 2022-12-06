@@ -210,5 +210,24 @@ namespace ProjectXBackend.Controllers
             await dbContext.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpPut]
+        [Route("{id:int}/update")]
+        public async Task<IActionResult> UpdatePlayerLevelCurrency(int id, int level, int currency)
+        {
+            var player = await dbContext.Players.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (player is null)
+            {
+                return NotFound($"Player with Id = {id} could not be found.");
+            }
+
+            player.Level = player.Level + level;
+            player.Currency = player.Currency + currency;
+
+            await dbContext.SaveChangesAsync();
+            return Ok();
+
+        }
     }
 }
