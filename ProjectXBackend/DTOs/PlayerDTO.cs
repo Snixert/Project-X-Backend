@@ -7,7 +7,7 @@ namespace ProjectXBackend.DTOs
         public string? Name { get; set; }
         public int Level { get; set; }
         public int Currency { get; set; }
-        public Item? Weapon { get; set; }
+        public int WeaponId { get; set; }
         public ICollection<PlayerStatDTO> PlayerStats { get; set; } = new List<PlayerStatDTO>();
     }
 }
