@@ -68,5 +68,29 @@ namespace ProjectXBackend.Controllers
             }
             return Ok(dto);
         }
+
+        [HttpGet]
+        [Route("stats/{id:int}")]
+        public async Task<IActionResult> GetItemStats(int id)
+        {
+            var item = await dbContext.Items.Where(x => x.Id == id).Include(i => i.ItemStats).ThenInclude(stat => stat.Stats).FirstOrDefaultAsync();
+
+            if (item is null)
+            {
+                return NotFound($"Item with the ID = {id} could not be found.");
+            }
+
+            List<ItemStatDTO> itemStatDTOs = new List<ItemStatDTO>();
+            foreach (var itemStat in item.ItemStats)
+            {
+                ItemStatDTO dto = new ItemStatDTO();
+                dto.StatsId = itemStat.StatsId;
+                dto.StatName = itemStat.Stats.StatName;
+                dto.StatsValue = itemStat.StatsValue;
+
+                itemStatDTOs.Add(dto);
+            }
+            return Ok(itemStatDTOs);
+        }
     }
 }
