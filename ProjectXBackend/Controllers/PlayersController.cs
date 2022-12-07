@@ -229,5 +229,17 @@ namespace ProjectXBackend.Controllers
             return Ok();
 
         }
+
+        [HttpPost]
+        [Route("{accountId:int}")]
+        public async Task<IActionResult> AddPlayer([FromBody] PlayerDTO addPlayerRequest, int accountId)
+        {
+            var account = await dbContext.Accounts.Where(x => x.Id == accountId).FirstOrDefaultAsync();
+
+            if (account is null)
+            {
+                return NotFound($"Account with Id = {accountId} could not be found.");
+            }
+        }
     }
 }
