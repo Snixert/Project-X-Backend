@@ -70,7 +70,7 @@ namespace ProjectXBackend.Controllers
 
             player.InventorySlots.Add(item);
             await dbContext.SaveChangesAsync();
-            return Ok(player.InventorySlots);
+            return Ok();
         }
 
         [HttpDelete]
@@ -79,11 +79,11 @@ namespace ProjectXBackend.Controllers
         {
             // Load player and player's inventory
             var inventory = await dbContext.Inventory.Where(i => i.PlayerId == playerId).ToListAsync();
-
+            var items = await dbContext.Items.ToListAsync();
             // Check if inventory could be found.
-            if (inventory is null)
+            if (inventory is null || !items.Any(i => i.Id == itemId))
             {
-                return NotFound($"Inventory for player with Id = {playerId} could not be found.");
+                return NotFound($"Inventory for player with Id = {playerId} could not be found or Item with Id = {itemId} does not exist.");
             }
 
             // Remove items with the requested ItemId
