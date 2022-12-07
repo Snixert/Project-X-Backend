@@ -229,5 +229,42 @@ namespace ProjectXBackend.Controllers
             return Ok();
 
         }
+
+        [HttpPost]
+        [Route("{accountId:int}")]
+        public async Task<IActionResult> AddPlayer(string characterName, int accountId)
+        {
+            var account = await dbContext.Accounts.Where(x => x.Id == accountId).FirstOrDefaultAsync();
+
+            if (account is null)
+            {
+                return NotFound($"Account with Id = {accountId} could not be found.");
+            }
+
+            // Create player object
+            Player playerCharacter = new Player();
+            playerCharacter.Name = characterName;
+            playerCharacter.Level = 1;
+            playerCharacter.Currency = 0;
+            playerCharacter.WeaponId = 1;
+
+            // Find all stats and add a PlayerStat for every stat in the DB
+            List<PlayerStat> playerStats = new List<PlayerStat>();
+            var stats = await dbContext.Stats.ToListAsync();
+            foreach (var stat in stats)
+            {
+                PlayerStat pStat = new PlayerStat();
+                pStat.StatsId = stat.Id;
+                pStat.StatsValue = 5;
+                pStat.PlayerId = playerCharacter.Id;
+
+                playerCharacter.PlayerStats.Add(pStat);
+            }
+            account.Player = playerCharacter;
+            await dbContext.SaveChangesAsync();
+            return Ok();
+
+
+        }
     }
 }
