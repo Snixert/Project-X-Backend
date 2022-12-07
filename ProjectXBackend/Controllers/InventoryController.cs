@@ -1,7 +1,6 @@
 ﻿using ProjectXBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ProjectXBackend.DTOs;
 
 namespace ProjectXBackend.Controllers
 {
