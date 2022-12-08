@@ -27,6 +27,7 @@ namespace ProjectXBackend.Controllers
                         ItemId = items.ItemId,
                         ItemName = items.Item.Name,
                         ItemType = items.Item.Type,
+                        Image = items.Item.Image,
                         ItemStats = items.Item.ItemStats.Select(s => new
                         {
                             StatsId = s.StatsId,

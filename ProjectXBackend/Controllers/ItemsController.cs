@@ -27,6 +27,8 @@ namespace ProjectXBackend.Controllers
                 dto.ItemId = item.Id;
                 dto.Name = item.Name;
                 dto.Type = item.Type;
+                dto.Price = item.Price;
+                dto.Image = item.Image;
                 foreach (var itemStat in item.ItemStats)
                 {
                     ItemStatDTO isd = new ItemStatDTO();
@@ -57,6 +59,8 @@ namespace ProjectXBackend.Controllers
             dto.ItemId = item.Id;
             dto.Name = item.Name;
             dto.Type = item.Type;
+            dto.Price = item.Price;
+            dto.Image = item.Image;
             foreach (var itemStat in item.ItemStats)
             {
                 ItemStatDTO isd = new ItemStatDTO();
