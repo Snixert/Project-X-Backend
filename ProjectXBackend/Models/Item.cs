@@ -11,6 +11,9 @@ public partial class Item
 
     public string Name { get; set; } = null!;
 
+    public int Price { get; set; }
+    public string Image { get; set; }
+
     public virtual ICollection<ItemStat> ItemStats { get; } = new List<ItemStat>();
 
     public virtual ICollection<Player> PlayersNavigation { get; } = new List<Player>();

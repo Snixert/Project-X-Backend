@@ -30,6 +30,8 @@ namespace ProjectXBackend.Controllers
                     {
                         Type = p.Weapon.Type,
                         Name = p.Weapon.Name,
+                        Price = p.Weapon.Price,
+                        Image = p.Weapon.Image,
                         ItemStats = p.Weapon.ItemStats.Select(w => new
                         {
                             StatsId = w.StatsId,
@@ -76,6 +78,8 @@ namespace ProjectXBackend.Controllers
                     {
                         Type = p.Weapon.Type,
                         Name = p.Weapon.Name,
+                        Price = p.Weapon.Price,
+                        Image = p.Weapon.Image,
                         ItemStats = p.Weapon.ItemStats.Select(w => new
                         {
                             StatsId = w.StatsId,
@@ -125,6 +129,8 @@ namespace ProjectXBackend.Controllers
             dto.ItemId = player.Weapon.Id;
             dto.Name = player.Weapon.Name;
             dto.Type = player.Weapon.Type;
+            dto.Price = player.Weapon.Price;
+            dto.Image = player.Weapon.Image;
             foreach (var itemStat in player.Weapon.ItemStats)
             {
                 ItemStatDTO isd = new ItemStatDTO();
