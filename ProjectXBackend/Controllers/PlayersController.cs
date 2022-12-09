@@ -202,7 +202,7 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpPut]
-        [Route("{playerId:int}/weapon")]
+        [Route("{playerId:int}/weapon/{weaponId:int}")]
         public async Task<IActionResult> UpdatePlayerWeapon(int playerId, int weaponId)
         {
             var player = await dbContext.Players.Where(x => x.Id == playerId).FirstOrDefaultAsync();
@@ -218,7 +218,7 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpPut]
-        [Route("{id:int}/update")]
+        [Route("{id:int}/level/{level:int}/currency/{currency:int}")]
         public async Task<IActionResult> UpdatePlayerLevelCurrency(int id, int level, int currency)
         {
             var player = await dbContext.Players.Where(x => x.Id == id).FirstOrDefaultAsync();
@@ -237,19 +237,18 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpPost]
-        [Route("{accountId:int}")]
-        public async Task<IActionResult> AddPlayer(string characterName, int accountId)
+        public async Task<IActionResult> AddPlayer([FromBody] AddPlayerDTO addPlayerRequest)
         {
-            var account = await dbContext.Accounts.Where(x => x.Id == accountId).FirstOrDefaultAsync();
+            var account = await dbContext.Accounts.Where(x => x.Id == addPlayerRequest.AccountId).FirstOrDefaultAsync();
 
             if (account is null)
             {
-                return NotFound($"Account with Id = {accountId} could not be found.");
+                return NotFound($"Account with Id = {addPlayerRequest.AccountId} could not be found.");
             }
 
             // Create player object
             Player playerCharacter = new Player();
-            playerCharacter.Name = characterName;
+            playerCharacter.Name = addPlayerRequest.Name;
             playerCharacter.Level = 1;
             playerCharacter.Currency = 0;
             playerCharacter.WeaponId = 1;
