@@ -9,6 +9,8 @@ public partial class Player
 
     public string? Name { get; set; }
 
+    public string Image { get; set; }
+
     public int? WeaponId { get; set; }
 
     public int? Level { get; set; }

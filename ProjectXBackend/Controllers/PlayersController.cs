@@ -23,6 +23,7 @@ namespace ProjectXBackend.Controllers
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    Image = p.Image,
                     WeaponId = p.WeaponId,
                     Level = p.Level,
                     Currency = p.Currency,
@@ -71,6 +72,7 @@ namespace ProjectXBackend.Controllers
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    Image = p.Image,
                     WeaponId = p.WeaponId,
                     Level = p.Level,
                     Currency = p.Currency,
@@ -249,6 +251,7 @@ namespace ProjectXBackend.Controllers
             // Create player object
             Player playerCharacter = new Player();
             playerCharacter.Name = addPlayerRequest.Name;
+            playerCharacter.Image = addPlayerRequest.Image;
             playerCharacter.Level = 1;
             playerCharacter.Currency = 0;
             playerCharacter.WeaponId = 1;
