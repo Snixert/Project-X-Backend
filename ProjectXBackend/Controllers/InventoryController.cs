@@ -93,7 +93,7 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpDelete]
-        [Route("{playerId:int}")]
+        [Route("{playerId:int}/remove/{itemId:int}")]
         public async Task<IActionResult> RemovePlayerInventoryItem(int playerId, int itemId)
         {
             // Load player and player's inventory
