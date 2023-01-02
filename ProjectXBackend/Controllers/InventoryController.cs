@@ -45,7 +45,7 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpPost]
-        [Route("{playerId:int}")]
+        [Route("{playerId:int}/add/{itemId:int}")]
         public async Task<IActionResult> AddPlayerInventoryItem(int itemId, int playerId)
         {
             // Load player and player's inventory
