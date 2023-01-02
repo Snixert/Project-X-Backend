@@ -45,23 +45,41 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpPost]
-        [Route("{playerId:int}")]
+        [Route("{playerId:int}/add/{itemId:int}")]
         public async Task<IActionResult> AddPlayerInventoryItem(int itemId, int playerId)
         {
             // Load player and player's inventory
             var player = await dbContext.Players.Include(p => p.InventorySlots).FirstOrDefaultAsync(p => p.Id == playerId);
 
-            // Check if player exists
-            if (player is null)
+            // Load the Item to check for its price
+            var shopItem = await dbContext.Items.Where(i => i.Id == itemId).FirstOrDefaultAsync();
+
+            // Check if player and item exist
+            if (player is null || shopItem is null)
             {
-                return NotFound($"Player with Id = {playerId} could not be found.");
+                return NotFound($"Unable to find either player with Id = {playerId} or item with Id = {itemId}");
+            }
+
+            // Check if player has enough currency to purchase item
+            if (player.Currency < shopItem.Price)
+            {
+                return Problem($"Not enough gold.");
             }
 
             // Check if player has room in inventory
             if (player.InventorySlots.Count >= 16)
             {
-                return Conflict($"Inventory is full for player with Id = {playerId}");
+                return Problem($"Inventory is full for player with Id = {playerId}");
             }
+
+            // Check if item already exists in players inventory
+            if (player.InventorySlots.Any(i => i.ItemId == itemId))
+            {
+                return Problem($"Player with Id = {playerId} already has item with Id = {itemId} in their inventory.");
+            }
+
+            // Subtract item price from player currency
+            player.Currency = player.Currency - shopItem.Price;
 
             InventorySlot item = new InventorySlot()
             {
