@@ -11,7 +11,7 @@ public partial class Player
 
     public string Image { get; set; }
 
-    public int? WeaponId { get; set; }
+    public int WeaponId { get; set; }
 
     public int? Level { get; set; }
 

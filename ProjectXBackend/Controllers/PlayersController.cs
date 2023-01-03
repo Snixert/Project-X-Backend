@@ -207,11 +207,38 @@ namespace ProjectXBackend.Controllers
         [Route("{playerId:int}/weapon/{weaponId:int}")]
         public async Task<IActionResult> UpdatePlayerWeapon(int playerId, int weaponId)
         {
-            var player = await dbContext.Players.Where(x => x.Id == playerId).FirstOrDefaultAsync();
+            var player = await dbContext.Players.Where(x => x.Id == playerId).Include(p => p.InventorySlots).FirstOrDefaultAsync();
+
+            if (!dbContext.Items.Any(i => i.Id == weaponId))
+            {
+                return NotFound($"Item with Id = {weaponId} could not be found.");
+            }
 
             if (player is null)
             {
                 return NotFound($"Player with Id = {playerId} could not be found.");
+            }
+
+            // Add the un-equipped item to inventory
+            if (!player.InventorySlots.Any(i => i.ItemId == player.WeaponId))
+            {
+                InventorySlot oldItem = new InventorySlot()
+                {
+                    PlayerId = playerId,
+                    ItemId = player.WeaponId
+                };
+                player.InventorySlots.Add(oldItem);
+            }
+            // Remove the newly equipped item from Inventory
+            if (player.InventorySlots.Any(i => i.ItemId == weaponId))
+            {
+                foreach (var item in player.InventorySlots)
+                {
+                    if (item.ItemId == weaponId)
+                    {
+                        dbContext.Inventory.Remove(item);
+                    }
+                }
             }
 
             player.WeaponId = weaponId;
