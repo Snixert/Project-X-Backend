@@ -1,6 +1,7 @@
 ﻿using ProjectXBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProjectXBackend.Controllers
 {
@@ -15,7 +16,7 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}")]
+        [Route("{id:int}"), Authorize]
         public async Task<IActionResult> GetPlayerInventory(int id)
         {
             var player = await dbContext.Players

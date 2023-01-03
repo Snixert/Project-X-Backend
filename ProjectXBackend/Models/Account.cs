@@ -7,9 +7,10 @@ public partial class Account
 {
     public int Id { get; set; }
 
-    public string Username { get; set; } = null!;
+    public string Username { get; set; } = string.Empty;
 
-    public string Password { get; set; } = null!;
+    public byte[] PasswordHash { get; set; }
+    public byte[] PasswordSalt { get; set; }
 
     public int? PlayerId { get; set; }
 

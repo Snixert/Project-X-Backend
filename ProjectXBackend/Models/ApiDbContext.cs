@@ -37,9 +37,10 @@ public partial class ApiDbContext : DbContext
             entity.ToTable("Account");
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.Password).HasMaxLength(50);
+            entity.Property(e => e.PasswordHash);
+            entity.Property(e => e.PasswordSalt);
             entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
-            entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.Username);
 
             entity.HasOne(d => d.Player).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.PlayerId)
