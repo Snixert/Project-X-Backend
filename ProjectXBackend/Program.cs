@@ -5,7 +5,16 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+string[] arrOrigins = { "https://localhost:4200", "http://localhost:4200" };
 
+builder.Services.AddCors(options =>
+{
+  options.AddDefaultPolicy(corsBuilder =>
+      corsBuilder.WithOrigins(arrOrigins)
+                 .AllowAnyMethod()
+                 .AllowAnyHeader()
+                 .AllowCredentials());
+});
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.UseCors();
 
 app.UseAuthorization();
 
