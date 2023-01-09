@@ -63,7 +63,70 @@ namespace ProjectXBackend.Controllers
 
             string token = CreateToken(account);
 
+            var refreshToken = GetRefreshToken();
+            var newRefreshToken = SetRefreshToken(refreshToken);
+
+            account.RefreshToken = newRefreshToken.Token;
+            account.TokenCreated = newRefreshToken.Created;
+            account.TokenExpires = newRefreshToken.Expires;
+
+            await dbContext.SaveChangesAsync();
+
             return Ok(token);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<string>> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            var account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.RefreshToken == refreshToken);
+
+            if (account is null)
+            {
+                return Unauthorized("Invalid Refresh Token.");
+            }
+            else if (account.TokenExpires < DateTime.Now)
+            {
+                return Unauthorized("Token expired.");
+            }
+
+            string token = CreateToken(account);
+            var newRefreshToken = GetRefreshToken();
+
+            account.RefreshToken = newRefreshToken.Token;
+            account.TokenCreated = newRefreshToken.Created;
+            account.TokenExpires = newRefreshToken.Expires;
+
+            await dbContext.SaveChangesAsync();
+
+            SetRefreshToken(newRefreshToken);
+
+            return Ok(token);
+        }
+
+        private RefreshToken GetRefreshToken()
+        {
+            var refreshToken = new RefreshToken()
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                Expires = DateTime.Now.AddSeconds(5),
+                Created = DateTime.Now
+            };
+
+            return refreshToken;
+        }
+
+        private RefreshToken SetRefreshToken(RefreshToken newRefreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newRefreshToken.Expires
+            };
+            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+
+            return newRefreshToken;
         }
 
         private string CreateToken(Account account)
