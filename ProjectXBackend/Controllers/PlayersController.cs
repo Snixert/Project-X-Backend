@@ -18,6 +18,8 @@ namespace ProjectXBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPlayers()
         {
+            // This way of loading gives a similar result to using a DTO but has more risks of breaking due to typos etc.
+            // I've kept it this way as mapping this into DTOs would require about 5 foreach loops and that'd give me motion sickness.
             var players = await dbContext.Players
                 .Select(p => new
                 {
@@ -66,6 +68,8 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> GetPlayer(int id)
         {
+            // This way of loading gives a similar result to using a DTO but has more risks of breaking due to typos etc.
+            // I've kept it this way, it works and I cba making a DTO and mapping for this.
             var players = await dbContext.Players
                 .Where(p => p.Id == id)
                 .Select(p => new
@@ -115,6 +119,7 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}/weapon")]
         public async Task<IActionResult> GetPlayerWeapon(int id)
         {
+            // Load a player and include/theninclude the nested object properties.
             var player = await dbContext.Players
                 .Include(p => p.Weapon)
                 .ThenInclude(w => w.ItemStats)
@@ -122,11 +127,13 @@ namespace ProjectXBackend.Controllers
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
 
+            // Check if player exists and if the player somehow has no weapon (They should always have a weapon).
             if (player is null || player.Weapon is null)
             {
-                return new EmptyResult();
+                return BadRequest($"Player with Id = {id} could not be found or the player somehow does not have a weapon");
             }
 
+            // Map weapon properties to a DTO.
             ItemDTO dto = new ItemDTO();
             dto.ItemId = player.Weapon.Id;
             dto.Name = player.Weapon.Name;
@@ -150,6 +157,7 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}/stats")]
         public async Task<IActionResult> GetPlayerStats(int id)
         {
+            // Load PlayerStats from a player based on a PlayerID.
             var playerStats = await dbContext.Players
                 .Where(p => p.Id == id)
                 .Select(p => new
@@ -162,6 +170,7 @@ namespace ProjectXBackend.Controllers
                     })
                 }).FirstOrDefaultAsync();
 
+            // Check if player exists.
             if (playerStats is null)
             {
                 return NotFound($"Player with Id = {id} could not be found");
@@ -186,6 +195,8 @@ namespace ProjectXBackend.Controllers
 
             foreach (var updatedPlayerStat in updatePlayerStatRequest)
             {
+                // Get the PlayerStat from the player that has the same StatsID as updatedPlayerStat's ID
+                // I do this to edit the existing stat on the player instead of removing/adding a whole PlayerStat object.
                 var existingStats = player.PlayerStats
                     .Where(ps => ps.StatsId == updatedPlayerStat.StatsId && ps.StatsId != default(int))
                     .SingleOrDefault();
@@ -195,7 +206,7 @@ namespace ProjectXBackend.Controllers
                 {
                     existingStats.StatsValue = updatedPlayerStat.StatsValue;
 
-                    // Set PlayerStat state to modified so it gets saved to the Database
+                    // Set PlayerStat state to modified so it gets saved to the Database (This is required for it to work for some reason).
                     dbContext.Entry(existingStats).State = EntityState.Modified;
                 }
             }
@@ -207,13 +218,16 @@ namespace ProjectXBackend.Controllers
         [Route("{playerId:int}/weapon/{weaponId:int}")]
         public async Task<IActionResult> UpdatePlayerWeapon(int playerId, int weaponId)
         {
+            // Load a player and Include the player's Inventory
             var player = await dbContext.Players.Where(x => x.Id == playerId).Include(p => p.InventorySlots).FirstOrDefaultAsync();
 
+            // Check if item exists
             if (!dbContext.Items.Any(i => i.Id == weaponId))
             {
                 return NotFound($"Item with Id = {weaponId} could not be found.");
             }
 
+            // Check if player exists
             if (player is null)
             {
                 return NotFound($"Player with Id = {playerId} could not be found.");
@@ -241,6 +255,7 @@ namespace ProjectXBackend.Controllers
                 }
             }
 
+            // Update the player's weapon
             player.WeaponId = weaponId;
             await dbContext.SaveChangesAsync();
             return Ok();
@@ -250,13 +265,18 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}/level/{level:int}/currency/{currency:int}")]
         public async Task<IActionResult> UpdatePlayerLevelCurrency(int id, int level, int currency)
         {
+            // Load a specific player
+            // No need to use .Include and .ThenInclude as this will update properties on the Player class and not nested properties.
             var player = await dbContext.Players.Where(x => x.Id == id).FirstOrDefaultAsync();
 
+            // Check if player exists
             if (player is null)
             {
                 return NotFound($"Player with Id = {id} could not be found.");
             }
 
+            // Note: Adding levels like this will probably have to be changed depending on how we want levels to work.
+            // Add the parameter values to existing values.
             player.Level = player.Level + level;
             player.Currency = player.Currency + currency;
 
@@ -281,6 +301,7 @@ namespace ProjectXBackend.Controllers
             playerCharacter.Image = addPlayerRequest.Image;
             playerCharacter.Level = 1;
             playerCharacter.Currency = 0;
+            // I'm setting a default value for weapon here as players need to have a weapon, change the ID to whatever.
             playerCharacter.WeaponId = 1;
 
             // Find all stats and add a PlayerStat for every stat in the DB
@@ -288,6 +309,7 @@ namespace ProjectXBackend.Controllers
             var stats = await dbContext.Stats.ToListAsync();
             foreach (var stat in stats)
             {
+                // Set a default value of 5 for each stat
                 PlayerStat pStat = new PlayerStat();
                 pStat.StatsId = stat.Id;
                 pStat.StatsValue = 5;
