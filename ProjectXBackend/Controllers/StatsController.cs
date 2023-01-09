@@ -18,9 +18,12 @@ namespace ProjectXBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStats()
         {
+            // Load all stats
             var stats = await dbContext.Stats.ToListAsync();
 
+            // Create a list of StatDTO
             List<StatDTO> statList = new List<StatDTO>();
+            // Loop through all stats from the Database and map the properties to the DTO
             foreach (var stat in stats)
             {
                 StatDTO dto = new StatDTO();
