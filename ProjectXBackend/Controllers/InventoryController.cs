@@ -19,6 +19,10 @@ namespace ProjectXBackend.Controllers
         [Route("{id:int}"), Authorize]
         public async Task<IActionResult> GetPlayerInventory(int id)
         {
+            // This way of loading gives a similar result to using a DTO but has more risks of breaking due to typos etc.
+            // This was planned to be using DTOs but I never got around to it.
+
+            // Load just the inventory from a player with the given playerId
             var player = await dbContext.Players
                 .Where(p => p.Id == id)
                 .Select(p => new
@@ -100,7 +104,7 @@ namespace ProjectXBackend.Controllers
             // Load player and player's inventory
             var inventory = await dbContext.Inventory.Where(i => i.PlayerId == playerId).ToListAsync();
             var items = await dbContext.Items.ToListAsync();
-            // Check if inventory could be found.
+            // Check if inventory could be found and if the itemId exists in the Items table.
             if (inventory is null || !items.Any(i => i.Id == itemId))
             {
                 return NotFound($"Inventory for player with Id = {playerId} could not be found or Item with Id = {itemId} does not exist.");
@@ -109,7 +113,8 @@ namespace ProjectXBackend.Controllers
             // Remove items with the requested ItemId
             foreach (var inventoryItem in inventory)
             {
-                //Note; This way of removing all items needs to be changed if we define inventory SlotId.
+                // Note: This way of removing all items needs to be changed if we define inventory SlotId or something that lets you have multiple of the same item.
+                // As it is now this would remove all items with the given itemId.
                 if (inventoryItem.ItemId == itemId)
                 {
                     dbContext.Inventory.Remove(inventoryItem);
