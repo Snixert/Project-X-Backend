@@ -26,11 +26,13 @@ namespace ProjectXBackend.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<Account>> Register(AccountDTO request)
         {
+            // Checks if the username input already exists in the database.
             if (dbContext.Accounts.Any(a => a.Username == request.Username))
             {
                 return BadRequest("Account already exists.");
             }
 
+            // Takes the password input, turns it into encrypted Hash and Salt.
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var account = new Account
@@ -51,19 +53,25 @@ namespace ProjectXBackend.Controllers
         {
             var account = await dbContext.Accounts.FirstOrDefaultAsync(u => u.Username == request.Username);
 
+            // Check if account with the inputted username exists
             if (account is null)
             {
                 return BadRequest("User not found.");
             }
 
+            // Check if password is correct
             if (!VerifyPasswordHash(request.Password, account.PasswordHash, account.PasswordSalt))
             {
                 return BadRequest("Incorrect Password.");
             }
 
+            // Generates a JWT token
             string token = CreateToken(account);
 
+            // Generates a refreshToken
             var refreshToken = GetRefreshToken();
+
+            // Sets the refreshToken in browser's Cookies
             var newRefreshToken = SetRefreshToken(refreshToken);
 
             account.RefreshToken = newRefreshToken.Token;
@@ -78,6 +86,8 @@ namespace ProjectXBackend.Controllers
         [HttpPost("refresh-token")]
         public async Task<ActionResult<string>> RefreshToken()
         {
+            // This will mostly end up being null when a token has expired causing the first if statement to be hit instead of the second.
+            // Most browsers clear expired cookies, Firefox doesn't but the line below still results in null. Idk wat do.
             var refreshToken = Request.Cookies["refreshToken"];
 
             var account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.RefreshToken == refreshToken);
@@ -86,12 +96,15 @@ namespace ProjectXBackend.Controllers
             {
                 return Unauthorized("Invalid Refresh Token.");
             }
-            else if (account.TokenExpires < DateTime.Now)
+            else if (account.TokenExpires < DateTime.Now || refreshToken is null)
             {
                 return Unauthorized("Token expired.");
             }
 
+            // Creates a new JWT token with an updated expiration time.
             string token = CreateToken(account);
+
+            // Generates a new RefreshToken
             var newRefreshToken = GetRefreshToken();
 
             account.RefreshToken = newRefreshToken.Token;
@@ -100,6 +113,7 @@ namespace ProjectXBackend.Controllers
 
             await dbContext.SaveChangesAsync();
 
+            // Replaces the existing refreshToken in Cookies with a new one and a new expiration time.
             SetRefreshToken(newRefreshToken);
 
             return Ok(token);
@@ -107,10 +121,11 @@ namespace ProjectXBackend.Controllers
 
         private RefreshToken GetRefreshToken()
         {
+            // Creates a Refresh Token, keep 'Expires' longer than the JWT 'expires' in CreateToken()
             var refreshToken = new RefreshToken()
             {
                 Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                Expires = DateTime.Now.AddSeconds(5),
+                Expires = DateTime.Now.AddHours(1),
                 Created = DateTime.Now
             };
 
@@ -119,6 +134,7 @@ namespace ProjectXBackend.Controllers
 
         private RefreshToken SetRefreshToken(RefreshToken newRefreshToken)
         {
+            // Sets the refresh token in browser's cookies
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -140,9 +156,10 @@ namespace ProjectXBackend.Controllers
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
+            // Creates the token, keep 'expires' shorter than GetRefreshToken()'s Expires
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddMinutes(15),
                 signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
