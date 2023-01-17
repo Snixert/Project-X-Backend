@@ -16,7 +16,8 @@ namespace ProjectXBackend.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}"), Authorize]
+        //[Route("{id:int}"), Authorize]
+        [Route("{id:int}")]
         public async Task<IActionResult> GetPlayerInventory(int id)
         {
             // This way of loading gives a similar result to using a DTO but has more risks of breaking due to typos etc.
